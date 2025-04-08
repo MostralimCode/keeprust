@@ -1,0 +1,8 @@
+[package]
+name = "keeprust"
+version = "0.1.0"
+edition = "2024"
+authors = ["Mostralim mostralimcode@pm.me"]
+description = "Notre projet : Un gestionnaire de mots de passe sécurisé (similaire à KeePass"
+
+[dependencies]

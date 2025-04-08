@@ -1,0 +1,16 @@
+# Fichiers et dossiers générés par Cargo
+/target/
+Cargo.lock
+
+# Fichiers de sauvegarde
+*.rs.bk
+
+# Fichiers de système
+.DS_Store
+Thumbs.db
+
+# Fichiers de test de la base de données
+*.kdbx
+*.kdb
+*.db
+test_*.json
