@@ -6,3 +6,17 @@ authors = ["Mostralim mostralimcode@pm.me"]
 description = "Notre projet : Un gestionnaire de mots de passe sécurisé (similaire à KeePass"
 
 [dependencies]
+# Sérialisation
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Modèle de données
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.16.0", features = ["v4", "serde"] }
+
+# Cryptographie
+aes-gcm = "0.10.3"
+ring = "0.17"
+
+# Interface utilisateur
+rpassword = "7.2"

@@ -1,3 +1,9 @@
+mod cli;
+mod crypto;
+mod models;
+mod utils;
+
 fn main() {
-    println!("Hello, world!");
+	println!("KeepRust - Gestionnaire de mots de passe sécurisé");
+	println!("Développement en cours...");
 }

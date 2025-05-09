@@ -2,11 +2,22 @@
 /target/
 Cargo.lock
 
+# Fichiers et dossiers spécifiques à l'IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
 # Fichiers de sauvegarde
 *.rs.bk
 
+# Fichiers binaires potentiels
+*.exe
+*.dll
+*.so
+*.dylib
+
 # Fichiers de système
-.DS_Store
 Thumbs.db
 
 # Fichiers de test de la base de données
@@ -14,3 +25,8 @@ Thumbs.db
 *.kdb
 *.db
 test_*.json
+
+# Autres fichiers temporaires
+*.tmp
+*.bak
+*.swp
