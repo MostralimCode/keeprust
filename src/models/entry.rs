@@ -48,27 +48,31 @@ impl Entry {
 	}
 
 	/// Met à jour l'entrée et actualise l'horodatage de modification
-	pub fn update(&mut self, title: Option<String>, username: Option<String>,
-			password: Option<String>, url: Option<String>, notes: Option<String>) {
+	pub fn update(&mut self, title: Option<String>, username: Option<String>, 
+				password: Option<String>, url: Option<String>, _notes: Option<String>) {
 		if let Some(title) = title {
-			self.title = title;
+		self.title = title;
 		}
 
 		if let Some(username) = username {
-			self.username = username;
+		self.username = username;
 		}
 
 		if let Some(password) = password {
-			self.password = password;
+		self.password = password;
 		}
 
 		if let Some(url) = url {
-			self.url = url;
+		self.url = url;
+		}
+
+		if let Some(notes) = _notes {
+		self.notes = notes;
 		}
 
 		// Mise à jour de l'horodatage
 		self.updated_at = Utc::now();
-	}
+		}
 }
 
 impl fmt::Display for Entry {
