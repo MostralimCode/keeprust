@@ -25,3 +25,5 @@ base64 = "0.21"
 thiserror = "1.0"
 
 rand = "0.8"
+
+clap = { version = "4.4", features = ["derive"] }
