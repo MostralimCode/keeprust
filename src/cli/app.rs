@@ -63,7 +63,7 @@ pub enum Commands {
         password: Option<String>,
         
         /// URL associée
-        #[arg(short, long)]
+        #[arg(short = 'r', long)]
         url: Option<String>,
         
         /// Notes supplémentaires
@@ -75,7 +75,7 @@ pub enum Commands {
         group: Option<String>,
         
         /// Génère un mot de passe aléatoire
-        #[arg(short, long)]
+        #[arg(short = 'G', long)]  // Changer de -g à -G
         generate: bool,
         
         /// Longueur du mot de passe généré
@@ -113,5 +113,16 @@ pub enum Commands {
         /// Exclut les caractères ambigus ({}[]()/\'"`~,;:.<>)
         #[arg(short = 'a', long)]  // Changé de 'e' à 'a'
         exclude_ambiguous: bool,
+    },
+
+     /// Crée un nouveau groupe
+     AddGroup {
+        /// Nom du groupe
+        #[arg(short, long)]
+        name: String,
+        
+        /// ID du groupe parent (utilise le groupe racine si non spécifié)
+        #[arg(short, long)]
+        parent: Option<String>,
     },
 }
