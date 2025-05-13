@@ -10,114 +10,70 @@ use crypto::{cipher, key_derivation};
 use models::repository::Repository;
 use std::path::Path;
 use serde_json;
+use utils::password_generator::PasswordGenerator;
 
 fn main() {
 	println!("KeepRust - Gestionnaire de mots de passe sécurisé");
 
-	// Test de persistance (repository)
-    println!("\nTest de persistance:");
+	// Test du générateur de mots de passe
+    println!("\nTest du générateur de mots de passe:");
     
-    // Créer une base de données avec quelques entrées
-    let mut db = Database::new(
-        "Ma base de mots de passe".to_string(),
-        "Base de données personnelle pour mes mots de passe".to_string()
-    );
-    
-    // Ajouter un groupe pour les emails
-    let email_group = Group::new("Email".to_string(), Some(db.root_group.id.clone()));
-    let email_group_id = email_group.id.clone();
-    db.root_group.add_subgroup(email_group);
-    
-    // Ajouter une entrée Gmail
-    let gmail_entry = Entry::new(
-        "Gmail".to_string(),
-        "utilisateur@gmail.com".to_string(),
-        "mot_de_passe_secure_123".to_string(),
-        "https://gmail.com".to_string(),
-        "Mon compte email principal".to_string()
-    );
-    
-    if let Some(group) = db.find_group_mut(&email_group_id) {
-        group.add_entry(gmail_entry);
-        println!("Entrée Gmail ajoutée");
+    // Générer un mot de passe avec les options par défaut
+    let generator = PasswordGenerator::default();
+    match generator.generate() {
+        Ok(password) => println!("Mot de passe par défaut: {}", password),
+        Err(e) => println!("Erreur: {}", e),
     }
     
-    // Ajouter un groupe pour les réseaux sociaux
-    let social_group = Group::new("Réseaux sociaux".to_string(), Some(db.root_group.id.clone()));
-    let social_group_id = social_group.id.clone();
-    db.root_group.add_subgroup(social_group);
-    
-    // Ajouter une entrée Facebook
-    let facebook_entry = Entry::new(
-        "Facebook".to_string(),
-        "user@example.com".to_string(),
-        "facebook_pwd_123!".to_string(),
-        "https://facebook.com".to_string(),
-        "Mon compte Facebook personnel".to_string()
-    );
-    
-    if let Some(group) = db.find_group_mut(&social_group_id) {
-        group.add_entry(facebook_entry);
-        println!("Entrée Facebook ajoutée");
+    // Générer un mot de passe complexe
+    match generator.generate_complex() {
+        Ok(password) => println!("Mot de passe complexe: {}", password),
+        Err(e) => println!("Erreur: {}", e),
     }
     
-    // Chemin du fichier de test
-    let test_file_path = Path::new("test_database.krs");
+    // Générer un mot de passe avec différentes options
+    let custom_generator = PasswordGenerator::new()
+        .length(20)
+        .exclude_similar(true)
+        .exclude_ambiguous(true);
     
-    // Créer un repository
-    let repo = Repository::new(test_file_path);
-    
-    // Mot de passe pour le test
-    let password = "mot_de_passe_maitre_123!";
-    
-    // Sauvegarder la base de données
-    match repo.save(&db, password) {
-        Ok(_) => println!("Base de données sauvegardée avec succès dans {:?}", test_file_path),
-        Err(e) => {
-            println!("Erreur lors de la sauvegarde: {}", e);
-            return;
-        }
+    match custom_generator.generate() {
+        Ok(password) => println!("Mot de passe personnalisé (20 caractères): {}", password),
+        Err(e) => println!("Erreur: {}", e),
     }
     
-    // Charger la base de données
-    let loaded_db = match repo.load(password) {
-        Ok(db) => {
-            println!("Base de données chargée avec succès");
-            db
-        },
-        Err(e) => {
-            println!("Erreur lors du chargement: {}", e);
-            return;
-        }
-    };
+    // Générer un mot de passe pour l'utilisation dans une URL (sans caractères spéciaux)
+    let url_safe_generator = PasswordGenerator::new()
+        .length(12)
+        .symbols(false);
     
-    // Vérifier que les données sont identiques
-    println!("\nVérification des données après chargement:");
-    println!("Nom: {}", loaded_db.metadata.name);
-    println!("Description: {}", loaded_db.metadata.description);
-    
-    // Vérifier les groupes
-    println!("\nGroupes et entrées:");
-    for (id, subgroup) in &loaded_db.root_group.subgroups {
-        println!("  Groupe: {} (ID: {})", subgroup.name, id);
-        
-        for (entry_id, entry) in &subgroup.entries {
-            println!("    Entrée: {} (ID: {})", entry.title, entry_id);
-            println!("      Utilisateur: {}", entry.username);
-        }
+    match url_safe_generator.generate() {
+        Ok(password) => println!("Mot de passe sûr pour URL: {}", password),
+        Err(e) => println!("Erreur: {}", e),
     }
     
-    // Test avec un mauvais mot de passe (devrait échouer)
-    println!("\nTest avec un mauvais mot de passe (devrait échouer):");
-    match repo.load("mauvais_mot_de_passe") {
-        Ok(_) => println!("ERREUR: La base a été déchiffrée avec un mauvais mot de passe!"),
-        Err(e) => println!("Échec attendu: {}", e),
+    // Générer un mot de passe facile à retenir (lettres uniquement)
+    let memorable_generator = PasswordGenerator::new()
+        .length(10)
+        .digits(false)
+        .symbols(false);
+    
+    match memorable_generator.generate() {
+        Ok(password) => println!("Mot de passe mémorable: {}", password),
+        Err(e) => println!("Erreur: {}", e),
     }
     
-    println!("\nTest de persistance terminé avec succès!");
+    // Générer un PIN (chiffres uniquement)
+    let pin_generator = PasswordGenerator::new()
+        .length(6)
+        .uppercase(false)
+        .lowercase(false)
+        .symbols(false);
     
-    // Nettoyage: supprimer le fichier de test
-    if let Err(e) = std::fs::remove_file(test_file_path) {
-        println!("Impossible de supprimer le fichier de test: {}", e);
+    match pin_generator.generate() {
+        Ok(password) => println!("PIN: {}", password),
+        Err(e) => println!("Erreur: {}", e),
     }
-} 
+    
+    println!("\nTest du générateur de mots de passe terminé!");
+}

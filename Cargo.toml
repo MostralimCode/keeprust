@@ -23,3 +23,5 @@ rpassword = "7.2"
 
 base64 = "0.21"
 thiserror = "1.0"
+
+rand = "0.8"
