@@ -27,3 +27,6 @@ thiserror = "1.0"
 rand = "0.8"
 
 clap = { version = "4.4", features = ["derive"] }
+
+zeroize = "1.6"
+clipboard = "0.5"

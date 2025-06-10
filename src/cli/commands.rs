@@ -5,6 +5,7 @@ use rpassword::read_password;
 use std::io::{self, Write};
 use std::path::Path;
 use chrono::Utc;
+use crate::utils::clipboard::{copy_password_securely, copy_to_clipboard};
 
 use super::app::{Cli, Commands};
 
@@ -45,6 +46,8 @@ pub fn run() -> Result<(), String> {
             println!("Cette commande n'est pas encore implémentée.");
             Ok(())
         }
+        Commands::Copy { id, timeout } => cmd_copy_password(db_path, &id, timeout),
+        Commands::CopyUser { id } => cmd_copy_username(db_path, &id),
     }
 }
 
@@ -422,5 +425,71 @@ fn cmd_add_group(path: &Path, name: String, parent_id: Option<String>) -> Result
     repo.save(&db, &password).map_err(|e| e.to_string())?;
     
     println!("Groupe '{}' ajouté avec succès (ID: {}).", name, group_id);
+    Ok(())
+}
+
+/// Copie le mot de passe d'une entrée dans le presse-papiers
+fn cmd_copy_password(path: &Path, id: &str, timeout: u64) -> Result<(), String> {
+    // Vérifier si le fichier existe
+    if !path.exists() {
+        return Err(format!("Le fichier {} n'existe pas.", path.display()));
+    }
+    
+    // Demander le mot de passe
+    print!("Mot de passe: ");
+    io::stdout().flush().map_err(|e| e.to_string())?;
+    let password = read_password().map_err(|e| e.to_string())?;
+    
+    // Ouvrir la base de données
+    let repo = Repository::new(path);
+    let db = match repo.load(&password) {
+        Ok(db) => db,
+        Err(e) => return Err(format!("Erreur lors de l'ouverture de la base de données: {}", e)),
+    };
+    
+    // Rechercher l'entrée
+    let entry = match db.find_entry(id) {
+        Some(entry) => entry,
+        None => return Err(format!("Entrée avec ID '{}' non trouvée.", id)),
+    };
+    
+    // Copier le mot de passe dans le presse-papiers
+    copy_password_securely(&entry.password, timeout)
+        .map_err(|e| e.to_string())?;
+    
+    println!("Mot de passe de '{}' copié dans le presse-papiers.", entry.title);
+    Ok(())
+}
+
+/// Copie le nom d'utilisateur d'une entrée dans le presse-papiers
+fn cmd_copy_username(path: &Path, id: &str) -> Result<(), String> {
+    // Vérifier si le fichier existe
+    if !path.exists() {
+        return Err(format!("Le fichier {} n'existe pas.", path.display()));
+    }
+    
+    // Demander le mot de passe
+    print!("Mot de passe: ");
+    io::stdout().flush().map_err(|e| e.to_string())?;
+    let password = read_password().map_err(|e| e.to_string())?;
+    
+    // Ouvrir la base de données
+    let repo = Repository::new(path);
+    let db = match repo.load(&password) {
+        Ok(db) => db,
+        Err(e) => return Err(format!("Erreur lors de l'ouverture de la base de données: {}", e)),
+    };
+    
+    // Rechercher l'entrée
+    let entry = match db.find_entry(id) {
+        Some(entry) => entry,
+        None => return Err(format!("Entrée avec ID '{}' non trouvée.", id)),
+    };
+    
+    // Copier le nom d'utilisateur dans le presse-papiers
+    copy_to_clipboard(&entry.username)
+        .map_err(|e| e.to_string())?;
+    
+    println!("Nom d'utilisateur de '{}' copié dans le presse-papiers.", entry.title);
     Ok(())
 }

@@ -116,7 +116,7 @@ pub enum Commands {
     },
 
      /// Crée un nouveau groupe
-     AddGroup {
+    AddGroup {
         /// Nom du groupe
         #[arg(short, long)]
         name: String,
@@ -124,5 +124,21 @@ pub enum Commands {
         /// ID du groupe parent (utilise le groupe racine si non spécifié)
         #[arg(short, long)]
         parent: Option<String>,
+    },
+
+    /// Copie le mot de passe d'une entrée dans le presse-papiers
+    Copy {
+        /// ID de l'entrée dont copier le mot de passe
+        id: String,
+        
+        /// Temps en secondes avant effacement automatique (0 = pas d'effacement)
+        #[arg(short, long, default_value = "30")]
+        timeout: u64,
+    },
+
+    /// Copie le nom d'utilisateur d'une entrée dans le presse-papiers
+    CopyUser {
+        /// ID de l'entrée dont copier le nom d'utilisateur
+        id: String,
     },
 }
