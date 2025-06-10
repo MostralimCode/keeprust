@@ -141,4 +141,21 @@ pub enum Commands {
         /// ID de l'entrée dont copier le nom d'utilisateur
         id: String,
     },
+
+    /// Analyse la force d'un mot de passe
+    Analyze {
+        /// Mot de passe à analyser (sera demandé si non spécifié)
+        #[arg(short, long)]
+        password: Option<String>,
+    },
+
+    /// Affiche l'historique des mots de passe d'une entrée
+    History {
+        /// ID de l'entrée
+        id: String,
+    },
+
+    /// Vérifie si des entrées utilisent des mots de passe faibles
+    Audit,
+
 }

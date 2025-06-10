@@ -6,7 +6,7 @@ use std::io::{self, Write};
 use std::path::Path;
 use chrono::Utc;
 use crate::utils::clipboard::{copy_password_securely, copy_to_clipboard};
-
+use crate::utils::password_analyzer::{PasswordAnalyzer, PasswordStrength};
 use super::app::{Cli, Commands};
 
 /// Exécute la commande CLI spécifiée
@@ -42,12 +42,16 @@ pub fn run() -> Result<(), String> {
             cmd_generate(length, !no_uppercase, !no_lowercase, !no_digits, !no_symbols, exclude_similar, exclude_ambiguous)
         },
         Commands::AddGroup { name, parent } => cmd_add_group(db_path, name, parent),
+        Commands::Copy { id, timeout } => cmd_copy_password(db_path, &id, timeout),
+        Commands::CopyUser { id } => cmd_copy_username(db_path, &id),
+        Commands::Analyze { password } => cmd_analyze_password(password),
+        Commands::History { id } => cmd_show_history(db_path, &id),
+        Commands::Audit => cmd_audit_passwords(db_path),
         _ => {
             println!("Cette commande n'est pas encore implémentée.");
             Ok(())
         }
-        Commands::Copy { id, timeout } => cmd_copy_password(db_path, &id, timeout),
-        Commands::CopyUser { id } => cmd_copy_username(db_path, &id),
+        
     }
 }
 
@@ -491,5 +495,119 @@ fn cmd_copy_username(path: &Path, id: &str) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
     
     println!("Nom d'utilisateur de '{}' copié dans le presse-papiers.", entry.title);
+    Ok(())
+}
+
+/// Analyse la force d'un mot de passe
+fn cmd_analyze_password(password: Option<String>) -> Result<(), String> {
+    let pwd = match password {
+        Some(p) => p,
+        None => {
+            print!("Mot de passe à analyser: ");
+            io::stdout().flush().map_err(|e| e.to_string())?;
+            read_password().map_err(|e| e.to_string())?
+        }
+    };
+    
+    let analyzer = PasswordAnalyzer::new();
+    let analysis = analyzer.analyze(&pwd);
+    
+    println!("\n🔍 Analyse du mot de passe:");
+    println!("{}", analysis);
+    
+    Ok(())
+}
+
+/// Affiche l'historique des mots de passe d'une entrée
+fn cmd_show_history(path: &Path, id: &str) -> Result<(), String> {
+    if !path.exists() {
+        return Err(format!("Le fichier {} n'existe pas.", path.display()));
+    }
+    
+    print!("Mot de passe: ");
+    io::stdout().flush().map_err(|e| e.to_string())?;
+    let password = read_password().map_err(|e| e.to_string())?;
+    
+    let repo = Repository::new(path);
+    let db = match repo.load(&password) {
+        Ok(db) => db,
+        Err(e) => return Err(format!("Erreur lors de l'ouverture de la base de données: {}", e)),
+    };
+    
+    let entry = match db.find_entry(id) {
+        Some(entry) => entry,
+        None => return Err(format!("Entrée avec ID '{}' non trouvée.", id)),
+    };
+    
+    println!("\n📜 Historique des mots de passe pour '{}':", entry.title);
+    
+    if entry.password_history.is_empty() {
+        println!("  (Aucun historique disponible)");
+    } else {
+        for (i, history) in entry.password_history.iter().enumerate() {
+            println!("  {}. Modifié le: {}", 
+                i + 1, 
+                history.changed_at.format("%d-%m-%Y %H:%M:%S")
+            );
+        }
+    }
+    
+    Ok(())
+}
+
+/// Audit de sécurité de toutes les entrées
+fn cmd_audit_passwords(path: &Path) -> Result<(), String> {
+    if !path.exists() {
+        return Err(format!("Le fichier {} n'existe pas.", path.display()));
+    }
+    
+    print!("Mot de passe: ");
+    io::stdout().flush().map_err(|e| e.to_string())?;
+    let password = read_password().map_err(|e| e.to_string())?;
+    
+    let repo = Repository::new(path);
+    let db = match repo.load(&password) {
+        Ok(db) => db,
+        Err(e) => return Err(format!("Erreur lors de l'ouverture de la base de données: {}", e)),
+    };
+    
+    let analyzer = PasswordAnalyzer::new();
+    let mut weak_passwords = Vec::new();
+    let mut total_entries = 0;
+    
+    // Fonction pour auditer un groupe
+    fn audit_group(group: &Group, analyzer: &PasswordAnalyzer, weak_passwords: &mut Vec<(String, String, PasswordStrength)>, total_entries: &mut usize) {
+        for (_, entry) in &group.entries {
+            *total_entries += 1;
+            let analysis = analyzer.analyze(&entry.password);
+            
+            if matches!(analysis.strength, PasswordStrength::VeryWeak | PasswordStrength::Weak) {
+                weak_passwords.push((entry.id.clone(), entry.title.clone(), analysis.strength));
+            }
+        }
+        
+        // Auditer récursivement les sous-groupes
+        for (_, subgroup) in &group.subgroups {
+            audit_group(subgroup, analyzer, weak_passwords, total_entries);
+        }
+    }
+    
+    audit_group(&db.root_group, &analyzer, &mut weak_passwords, &mut total_entries);
+    
+    println!("\n🔐 Audit de sécurité terminé:");
+    println!("Total d'entrées analysées: {}", total_entries);
+    
+    if weak_passwords.is_empty() {
+        println!("✅ Aucun mot de passe faible détecté!");
+    } else {
+        println!("⚠️  {} mot(s) de passe faible(s) détecté(s):", weak_passwords.len());
+        
+        for (id, title, strength) in weak_passwords {
+            println!("  - {} (ID: {}) - Force: {}", title, id, strength);
+        }
+        
+        println!("\n💡 Recommandation: Utilisez la commande 'generate' pour créer des mots de passe plus forts.");
+    }
+    
     Ok(())
 }
