@@ -3,14 +3,7 @@ mod crypto;
 mod models;
 mod utils;
 
-use models::entry::Entry;
-use models::group::Group;
-use models::database::Database;
-use crypto::{cipher, key_derivation};
-use models::repository::Repository;
-use std::path::Path;
-use serde_json;
-use cli::commands;
+use crate::cli::commands;
 use utils::password_generator::PasswordGenerator;
 
 fn main() {

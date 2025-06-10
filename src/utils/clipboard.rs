@@ -9,6 +9,7 @@ pub enum ClipboardError {
     AccessError(String),
     
     #[error("Presse-papiers non disponible")]
+    #[allow(dead_code)]
     NotAvailable,
 }
 
@@ -69,12 +70,14 @@ impl SecureClipboard {
     }
     
     /// Lit le contenu du presse-papiers
+    #[allow(dead_code)]
     pub fn read(&mut self) -> Result<String, ClipboardError> {
         self.context.get_contents()
             .map_err(|e| ClipboardError::AccessError(e.to_string()))
     }
     
     /// Efface le presse-papiers
+    #[allow(dead_code)]
     pub fn clear(&mut self) -> Result<(), ClipboardError> {
         self.context.set_contents(String::new())
             .map_err(|e| ClipboardError::AccessError(e.to_string()))?;

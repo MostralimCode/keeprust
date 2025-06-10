@@ -5,6 +5,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum PasswordAnalysisError {
     #[error("Erreur d'analyse: {0}")]
+    #[allow(dead_code)]
     AnalysisError(String),
 }
 

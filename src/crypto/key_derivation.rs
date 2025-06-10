@@ -12,6 +12,7 @@ pub enum KeyDerivationError {
 
 /// Structure contenant la clé dérivée et le sel utilisé
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct MasterKey {
     /// Sel utilisé pour la dérivation (encodé en base64)
     pub salt: String,

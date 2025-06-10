@@ -4,9 +4,9 @@ use clap::Parser;
 use rpassword::read_password;
 use std::io::{self, Write};
 use std::path::Path;
-use chrono::Utc;
 use crate::utils::clipboard::{copy_password_securely, copy_to_clipboard};
 use crate::utils::password_analyzer::{PasswordAnalyzer, PasswordStrength};
+
 use super::app::{Cli, Commands};
 
 /// Exécute la commande CLI spécifiée
@@ -47,11 +47,6 @@ pub fn run() -> Result<(), String> {
         Commands::Analyze { password } => cmd_analyze_password(password),
         Commands::History { id } => cmd_show_history(db_path, &id),
         Commands::Audit => cmd_audit_passwords(db_path),
-        _ => {
-            println!("Cette commande n'est pas encore implémentée.");
-            Ok(())
-        }
-        
     }
 }
 

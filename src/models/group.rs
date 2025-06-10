@@ -61,16 +61,19 @@ impl Group {
     }
     
     /// Récupère une entrée par son ID
+    #[allow(dead_code)]
     pub fn get_entry(&self, id: &str) -> Option<&Entry> {
         self.entries.get(id)
     }
     
     /// Récupère une entrée mutable par son ID
+    #[allow(dead_code)]
     pub fn get_entry_mut(&mut self, id: &str) -> Option<&mut Entry> {
         self.entries.get_mut(id)
     }
     
     /// Supprime une entrée par son ID
+    #[allow(dead_code)]
     pub fn remove_entry(&mut self, id: &str) -> Option<Entry> {
         let result = self.entries.remove(id);
         if result.is_some() {
@@ -80,16 +83,19 @@ impl Group {
     }
     
     /// Récupère un sous-groupe par son ID
+    #[allow(dead_code)]
     pub fn get_subgroup(&self, id: &str) -> Option<&Group> {
         self.subgroups.get(id)
     }
     
     /// Récupère un sous-groupe mutable par son ID
+    #[allow(dead_code)]
     pub fn get_subgroup_mut(&mut self, id: &str) -> Option<&mut Group> {
         self.subgroups.get_mut(id)
     }
     
     /// Supprime un sous-groupe par son ID
+    #[allow(dead_code)]
     pub fn remove_subgroup(&mut self, id: &str) -> Option<Group> {
         let result = self.subgroups.remove(id);
         if result.is_some() {

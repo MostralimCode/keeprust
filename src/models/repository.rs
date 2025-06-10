@@ -1,4 +1,4 @@
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -159,6 +159,7 @@ impl Repository {
     }
     
     /// Vérifie si le fichier de base de données existe
+    #[allow(dead_code)]
     pub fn exists(&self) -> bool {
         self.path.exists()
     }

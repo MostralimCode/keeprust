@@ -62,6 +62,7 @@ impl Entry {
     }
     
     /// Met à jour l'entrée et actualise l'horodatage de modification
+    #[allow(dead_code)]
     pub fn update(&mut self, title: Option<String>, username: Option<String>, 
                   password: Option<String>, url: Option<String>, _notes: Option<String>) {
         if let Some(title) = title {
@@ -111,6 +112,7 @@ impl Entry {
     }
     
     /// Vérifie si un mot de passe a déjà été utilisé
+    #[allow(dead_code)]
     pub fn has_used_password(&self, password: &str) -> bool {
         if self.password == password {
             return true;
@@ -120,6 +122,7 @@ impl Entry {
     }
     
     /// Efface le mot de passe de manière sécurisée
+    #[allow(dead_code)]
     pub fn clear_password(&mut self) {
         self.password.zeroize();
     }
